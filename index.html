@@ -1,1 +1,278 @@
 
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#15102f">
+<title>MR Chat - Voice Party</title>
+<style>
+*{box-sizing:border-box}
+:root{--bg:#100d24;--panel:#1d1938;--muted:#aaa5c8;--pink:#f15ca9;--blue:#655cff;--line:#383153}
+body{margin:0;background:var(--bg);color:#fff;font-family:system-ui,-apple-system,sans-serif;font-size:14px}
+button,input{font:inherit}button{cursor:pointer;color:white;border:0}
+.app{max-width:480px;margin:auto;min-height:100vh;padding-bottom:84px;background:linear-gradient(180deg,#17112f,#100d24 45%)}
+header{padding:18px 17px 12px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-size:25px;font-weight:900;letter-spacing:-1px}
+.logo span{color:#f47fc2}
+.sub{font-size:11px;color:var(--muted);margin-top:2px}
+.circle{width:40px;height:40px;border-radius:50%;background:#30274e;display:grid;place-items:center;font-size:19px}
+.search{margin:5px 16px 16px;background:#211b3c;border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;gap:8px}
+.search input{background:transparent;color:white;border:0;outline:0;width:100%}
+.tabs{display:flex;gap:20px;padding:0 18px 13px;overflow:auto}
+.tabs button{background:none;color:var(--muted);white-space:nowrap;padding:7px 0}
+.tabs button.active{color:white;border-bottom:2px solid var(--pink);font-weight:700}
+.hero{margin:0 16px 20px;padding:19px;border-radius:22px;background:linear-gradient(120deg,#5836a8,#bb428e 65%,#f28b86);position:relative;overflow:hidden}
+.hero:after{content:"🎙️";position:absolute;right:14px;bottom:3px;font-size:76px;opacity:.65;transform:rotate(-12deg)}
+.hero h2{font-size:23px;margin:0 0 7px;max-width:235px}
+.hero p{margin:0 0 16px;color:#f9eaff;font-size:12px;max-width:230px}
+.primary{background:linear-gradient(100deg,#8a5cff,#ef58a7);border-radius:12px;padding:11px 16px;font-weight:750}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin:18px 17px 12px}
+.section-head h3{margin:0;font-size:17px}
+.section-head button{background:none;color:#d5b8ff;font-size:12px}
+.room-grid{padding:0 16px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.room{border:1px solid #393052;background:linear-gradient(155deg,#292147,#1b1734);border-radius:17px;overflow:hidden;min-width:0}
+.cover{height:91px;display:flex;align-items:center;justify-content:center;font-size:39px;background:linear-gradient(135deg,#6042b6,#df5b9b)}
+.cover.c2{background:linear-gradient(135deg,#1d7795,#655bce)}
+.cover.c3{background:linear-gradient(135deg,#b75b36,#7039a2)}
+.cover.c4{background:linear-gradient(135deg,#256b58,#a35db3)}
+.room-info{padding:11px}
+.room-info h4{font-size:13px;margin:0 0 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.small{font-size:11px;color:var(--muted)}
+.room-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:11px}
+.join{background:#5140a0;border-radius:9px;padding:7px 10px;font-size:11px}
+.page{display:none;padding-bottom:20px}
+.page.active{display:block}
+.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#19152e;border-top:1px solid #393052;display:flex;justify-content:space-around;padding:10px 2px calc(10px + env(safe-area-inset-bottom));z-index:5}
+.nav{flex:1;background:transparent;color:#9189ae;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px}
+.nav b{font-size:21px;font-weight:400}
+.nav.active{color:#f47fc2}
+.panel{margin:15px 16px;padding:17px;border-radius:18px;background:var(--panel);border:1px solid var(--line)}
+.field{width:100%;padding:12px;border-radius:11px;border:1px solid #45395f;background:#15112c;color:white;margin:7px 0 12px;outline:none}
+.full{width:100%;padding:12px;border-radius:11px;background:#47347c;margin-top:8px}
+.profile-top{text-align:center;padding:28px 16px 15px}
+.avatar{width:86px;height:86px;border-radius:50%;background:linear-gradient(135deg,#8758ff,#f15ca9);display:grid;place-items:center;font-size:42px;margin:0 auto 12px;border:3px solid #f9a5d5}
+.stats{display:flex;justify-content:space-around;margin-top:22px}
+.stats strong{display:block;font-size:19px}.stats span{font-size:11px;color:var(--muted)}
+.room-head{padding:18px;background:linear-gradient(130deg,#51339d,#b94e9a);border-radius:20px;margin:16px}
+.room-head h2{margin:0 0 6px}
+.seats{display:grid;grid-template-columns:repeat(4,1fr);gap:13px 6px;padding:18px 12px}
+.seat{background:none;min-width:0;text-align:center;padding:0}
+.seat-face{width:57px;height:57px;border-radius:50%;margin:0 auto 6px;display:grid;place-items:center;background:#2e2749;border:2px dashed #63547f;font-size:23px;position:relative}
+.seat.taken .seat-face{border:2px solid #ed80bd;background:linear-gradient(145deg,#6445a7,#9a438d)}
+.seat .name{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.seat .mic{font-size:10px;color:#ff9acb}
+.chatbox{height:130px;overflow:auto;background:#17132b;border-radius:12px;padding:12px;color:#d5cce8;font-size:12px}
+.chatline{margin-bottom:7px}
+.chat-send{display:flex;gap:7px;margin-top:8px}
+.chat-send input{min-width:0;flex:1;background:#15112c;border:1px solid var(--line);border-radius:10px;padding:10px;color:white}
+.chat-send button{background:#6c4bd2;border-radius:10px;padding:0 15px}
+.rowbtn{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.rowbtn button{background:#352951;padding:10px;border-radius:10px;flex:1}
+.empty{text-align:center;padding:40px 15px;color:var(--muted)}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#f7eaff;color:#24143c;padding:11px 17px;border-radius:12px;z-index:10;display:none;max-width:90%;text-align:center}
+@media(min-width:481px){body{background:#090717}.app{box-shadow:0 0 50px #0005}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+ <div><div class="logo">MR <span>CHAT</span></div><div class="sub">VOICE PARTY · CONNECT TOGETHER</div></div>
+ <button class="circle" onclick="notify('নোটিফিকেশন সিস্টেম পরের ধাপে যুক্ত হবে')">♧</button>
+</header>
+
+<main id="home" class="page active">
+ <div class="search">⌕ <input id="search" placeholder="রুম, হোস্ট বা Room ID খুঁজুন..." oninput="renderRooms()"></div>
+ <div class="tabs">
+  <button class="active" onclick="setTab(this,'Following')">Following</button>
+  <button onclick="setTab(this,'Popular')">Popular</button>
+  <button onclick="setTab(this,'Recent')">Recent</button>
+ </div>
+ <section class="hero">
+  <h2>তোমার নিজের Voice Party!</h2>
+  <p>বন্ধুদের সঙ্গে কথা বলো, নতুন বন্ধু বানাও, আনন্দ করো।</p>
+  <button class="primary" onclick="createRoom()">＋ Create Room</button>
+ </section>
+ <div class="section-head"><h3>🔥 Live Voice Rooms</h3><button onclick="showPage('discovery')">সব দেখুন →</button></div>
+ <div id="rooms" class="room-grid"></div>
+ <div class="panel">
+  <h3 style="margin-top:0">🔑 Room ID দিয়ে যোগ দাও</h3>
+  <input id="roomCode" class="field" placeholder="Room ID লিখুন">
+  <button class="primary" style="width:100%" onclick="joinById()">Join Room →</button>
+ </div>
+</main>
+
+<section id="discovery" class="page">
+ <div class="section-head"><h3>🌍 Discover Rooms</h3></div>
+ <div class="search">⌕ <input placeholder="রুম খুঁজুন..." oninput="document.getElementById('search').value=this.value;renderRooms()"></div>
+ <div id="discoveryRooms" class="room-grid"></div>
+ <div class="panel"><h3>নিজের রুম তৈরি করো</h3><p class="small">বন্ধুদের আমন্ত্রণ জানাও এবং নিজের পার্টি শুরু করো।</p><button class="primary" onclick="createRoom()">＋ Create New Room</button></div>
+</section>
+
+<section id="voice" class="page">
+ <div id="roomScreen"><div class="empty">প্রথমে Home থেকে একটি রুমে প্রবেশ করো।</div></div>
+</section>
+
+<section id="messages" class="page">
+ <div class="section-head"><h3>💬 Messages</h3></div>
+ <div class="panel">
+  <h3>MR Chat Assistant</h3><p class="small">অ্যাপের পরীক্ষামূলক মেসেজ স্ক্রিন</p>
+  <div class="chatbox" id="dmLog"><div class="chatline">MR Chat: স্বাগতম! তোমার অ্যাপ পরীক্ষা শুরু করো।</div></div>
+  <div class="chat-send"><input id="dmInput" placeholder="মেসেজ লিখুন..." onkeydown="if(event.key==='Enter')sendDM()"><button onclick="sendDM()">➤</button></div>
+ </div>
+ <div class="panel"><p class="small">এই প্রাথমিক সংস্করণের মেসেজ শুধু এই ডিভাইসে দেখা যাবে। অন্য ব্যবহারকারীর সঙ্গে লাইভ চ্যাটের জন্য পরে ব্যাকএন্ড যুক্ত হবে।</p></div>
+</section>
+
+<section id="profile" class="page">
+ <div class="profile-top">
+  <div class="avatar" id="avatar">🐦</div>
+  <h2 id="profileName" style="margin:0 0 5px">MR User</h2>
+  <div class="small" id="profileId">ID: 10010001 · LV 1</div>
+  <p id="profileBio" class="small">Welcome to my MR Chat profile ✨</p>
+  <button class="primary" onclick="editProfile()">✎ Edit Profile</button>
+  <div class="stats"><div><strong id="followers">0</strong><span>Followers</span></div><div><strong>0</strong><span>Following</span></div><div><strong id="coinCount">1000</strong><span>Test Coins</span></div></div>
+ </div>
+ <div class="panel">
+  <h3>My Account</h3>
+  <button class="full" onclick="showPage('messages')">💌 Messages</button>
+  <button class="full" onclick="showWallet()">🪙 Wallet & Gifts</button>
+  <button class="full" onclick="notify('Settings পরের ধাপে যুক্ত হবে')">⚙️ Settings</button>
+  <button class="full" onclick="shareProfile()">↗ Share Profile</button>
+ </div>
+ <div class="panel" id="wallet" style="display:none">
+  <h3>🪙 Test Wallet</h3><p>Balance: <b id="walletBalance">1000</b> test coins</p>
+  <p class="small">এগুলো পরীক্ষামূলক কয়েন; কোনো বাস্তব আর্থিক মূল্য নেই।</p>
+  <button class="primary" onclick="sendTestGift()">🎁 Send Test Gift · 100 coins</button>
+ </div>
+</section>
+
+<nav class="bottom">
+ <button class="nav active" data-page="home" onclick="showPage('home',this)"><b>⌂</b>Home</button>
+ <button class="nav" data-page="discovery" onclick="showPage('discovery',this)"><b>◉</b>Discover</button>
+ <button class="nav" data-page="voice" onclick="showPage('voice',this)"><b>🎙</b>Voice Room</button>
+ <button class="nav" data-page="messages" onclick="showPage('messages',this)"><b>▤</b>Messages</button>
+ <button class="nav" data-page="profile" onclick="showPage('profile',this)"><b>♙</b>Profile</button>
+</nav>
+<div id="toast" class="toast"></div>
+</div>
+
+<script>
+const initialRooms=[
+ {id:'MR1001',name:'বন্ধুদের আড্ডা 🎉',host:'MR King',emoji:'🎉',cover:'',count:12,seatCount:8,theme:'c1'},
+ {id:'MR1002',name:'Music & Chill 🎵',host:'Music Queen',emoji:'🎧',count:8,seatCount:8,theme:'c2'},
+ {id:'MR1003',name:'Bangla Party 🇧🇩',host:'Rasel',emoji:'🇧🇩',count:16,seatCount:8,theme:'c3'},
+ {id:'MR1004',name:'Night Owls 🌙',host:'Dream Girl',emoji:'🌙',count:5,seatCount:8,theme:'c4'}
+];
+let rooms=initialRooms.map(r=>({...r,seats:Array(r.seatCount).fill(null)}));
+let currentRoom=null,tab='Following',toastTimer;
+let user={name:'MR User',bio:'Welcome to my MR Chat profile ✨',avatar:'🐦',id:'10010001'};
+let coins=1000;
+function notify(msg){
+ const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';
+ clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.style.display='none',2400);
+}
+function setTab(btn,value){
+ tab=value;document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderRooms();
+}
+function renderRooms(){
+ const q=(document.getElementById('search')?.value||'').toLowerCase();
+ const list=rooms.filter(r=>(r.name+' '+r.host+' '+r.id).toLowerCase().includes(q));
+ const html=list.map(r=>`<article class="room">
+ <div class="cover ${r.theme}">${r.emoji}</div><div class="room-info">
+ <h4>${esc(r.name)}</h4><div class="small">${esc(r.host)} · ${r.id}</div>
+ <div class="room-bottom"><span class="small">👥 ${r.count}</span><button class="join" onclick="openRoom('${r.id}')">Join ↗</button></div>
+ </div></article>`).join('')||'<div class="empty" style="grid-column:1/-1">কোনো রুম পাওয়া যায়নি।</div>';
+ document.getElementById('rooms').innerHTML=html;
+ document.getElementById('discoveryRooms').innerHTML=html;
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function showPage(id,btn){
+ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+ document.getElementById(id).classList.add('active');
+ document.querySelectorAll('.nav').forEach(n=>n.classList.toggle('active',n.dataset.page===id));
+ if(id==='voice'&&!currentRoom)document.getElementById('roomScreen').innerHTML='<div class="empty">প্রথমে Home থেকে একটি রুমে প্রবেশ করো।</div>';
+ window.scrollTo(0,0);
+}
+function createRoom(){
+ const name=prompt('তোমার নতুন রুমের নাম লিখুন:','আমার Voice Party 🎉');
+ if(!name||!name.trim())return;
+ const r={id:'MR'+Math.floor(10000+Math.random()*89999),name:name.trim(),host:user.name,emoji:'🎙️',count:1,seatCount:8,theme:'c2',seats:Array(8).fill(null)};
+ rooms.unshift(r);renderRooms();openRoom(r.id);notify('নতুন রুম তৈরি হয়েছে!');
+}
+function joinById(){
+ const id=document.getElementById('roomCode').value.trim().toUpperCase();
+ const r=rooms.find(r=>r.id.toUpperCase()===id);
+ if(!r){notify('এই ID-এর রুম পাওয়া যায়নি।');return;}openRoom(r.id);
+}
+function openRoom(id){
+ currentRoom=rooms.find(r=>r.id===id);if(!currentRoom)return;
+ showPage('voice');
+ renderRoom();
+}
+function renderRoom(){
+ const r=currentRoom;if(!r)return;
+ document.getElementById('roomScreen').innerHTML=`
+ <div class="room-head"><div class="small">🎙 LIVE VOICE ROOM · ${r.id}</div><h2>${esc(r.name)}</h2><div>${esc(r.host)} · 👥 ${r.count} users</div></div>
+ <div class="section-head"><h3>🪑 Voice Seats</h3><span class="small">একটি খালি সিট বেছে নাও</span></div>
+ <div class="seats">${r.seats.map((s,i)=>`<button class="seat ${s?'taken':''}" onclick="seatAction(${i})"><div class="seat-face">${s?esc(s.avatar):'＋'}</div><div class="name">${s?esc(s.name):'Seat '+(i+1)}</div><div class="mic">${s?(s.id===user.id?'🎙 My Seat':'🎤 Occupied'):'Tap to join'}</div></button>`).join('')}</div>
+ <div class="panel"><h3>💬 Room Chat</h3><div class="chatbox" id="roomChat"><div class="chatline">MR Chat: ${esc(r.name)}-এ স্বাগতম!</div></div><div class="chat-send"><input id="roomMsg" placeholder="মেসেজ লিখুন..." onkeydown="if(event.key==='Enter')sendRoomMsg()"><button onclick="sendRoomMsg()">➤</button></div>
+ <div class="rowbtn"><button onclick="notify('প্রোটোটাইপে মাইক্রোফোন এখনো সংযুক্ত নয়')">🎙 Mic</button><button onclick="notify('গিফট স্টোর পরের ধাপে যুক্ত হবে')">🎁 Gift</button><button onclick="shareRoom()">↗ Share</button></div>
+ <button class="full" onclick="showPage('discovery')">🎮 Games</button><button class="full" onclick="leaveRoom()">↩ Leave Room</button></div>`;
+}
+function seatAction(i){
+ const r=currentRoom;if(!r)return;
+ if(r.seats[i]&&r.seats[i].id!==user.id){notify('এই সিটটি ইতিমধ্যে নেওয়া হয়েছে।');return;}
+ if(r.seats[i]?.id===user.id){r.seats[i]=null;r.count=Math.max(0,r.count-1);notify('তুমি সিট ছেড়েছ।');}
+ else{
+  const old=r.seats.findIndex(s=>s?.id===user.id);if(old>=0)r.seats[old]=null;
+  r.seats[i]={...user};r.count=Math.max(1,r.count+(old<0?1:0));notify('তুমি সিটে বসেছ! 🎉');
+ }
+ renderRoom();renderRooms();
+}
+function leaveRoom(){
+ if(currentRoom){const i=currentRoom.seats.findIndex(s=>s?.id===user.id);if(i>=0){currentRoom.seats[i]=null;currentRoom.count=Math.max(0,currentRoom.count-1);}}
+ currentRoom=null;showPage('home');renderRooms();notify('রুম থেকে বের হয়েছ।');
+}
+function sendRoomMsg(){
+ const input=document.getElementById('roomMsg');if(!input||!input.value.trim())return;
+ const box=document.getElementById('roomChat');const line=document.createElement('div');line.className='chatline';line.textContent=user.name+': '+input.value.trim();box.appendChild(line);box.scrollTop=box.scrollHeight;input.value='';
+}
+function sendDM(){
+ const input=document.getElementById('dmInput');if(!input.value.trim())return;
+ const line=document.createElement('div');line.className='chatline';line.textContent=user.name+': '+input.value.trim();
+ document.getElementById('dmLog').appendChild(line);input.value='';
+}
+function editProfile(){
+ const name=prompt('তোমার নাম লিখুন:',user.name);if(name===null)return;
+ const bio=prompt('তোমার Bio লিখুন:',user.bio);if(bio===null)return;
+ const avatar=prompt('Avatar emoji লিখুন:',user.avatar);if(avatar===null)return;
+ user.name=name.trim()||user.name;user.bio=bio.trim();user.avatar=avatar.trim()||'🐦';
+ document.getElementById('profileName').textContent=user.name;
+ document.getElementById('profileBio').textContent=user.bio;
+ document.getElementById('avatar').textContent=user.avatar;
+ if(currentRoom){const i=currentRoom.seats.findIndex(s=>s?.id===user.id);if(i>=0)currentRoom.seats[i]={...user};renderRoom();}
+ rooms.forEach(r=>{if(r.host==='MR User')r.host=user.name;});renderRooms();
+ notify('প্রোফাইল আপডেট হয়েছে।');
+}
+function shareRoom(){
+ const text='Join my MR Chat room: '+currentRoom.id;
+ if(navigator.share)navigator.share({title:'MR Chat',text}).catch(()=>{});
+ else if(navigator.clipboard)navigator.clipboard.writeText(text).then(()=>notify('Room ID কপি হয়েছে!')).catch(()=>notify(text));
+ else notify(text);
+}
+function shareProfile(){
+ const text='MR Chat profile: '+user.name+' · ID '+user.id;
+ if(navigator.share)navigator.share({title:'MR Chat Profile',text}).catch(()=>{});
+ else notify(text);
+}
+function showWallet(){const w=document.getElementById('wallet');w.style.display=w.style.display==='none'?'block':'none';}
+function sendTestGift(){
+ if(coins<100){notify('পর্যাপ্ত test coins নেই।');return;}
+ coins-=100;document.getElementById('coinCount').textContent=coins;document.getElementById('walletBalance').textContent=coins;
+ notify('🎁 Test gift পাঠানো হয়েছে! 100 coins ব্যবহার হয়েছে।');
+}
+renderRooms();
+</script>
+</body>
+</html>
+
